@@ -1,4 +1,5 @@
 def get_html(url):
+	''' Return the HTML content from the page at specified URL'''
     import urllib.request
     f = urllib.request.urlopen(url)
     html = f.read().decode("utf-8")
@@ -6,23 +7,27 @@ def get_html(url):
     return html
 
 def get_inside_string(string, start, end):
+	''' Return the substring beginning with start and ending with end'''
     start_index = string.index(start) + len(start)
     end_index = string.index(end)
     result = string[start_index:end_index]
     return result
 
 def get_today_transcript_links():
+	''' Return a list of of all transcripts posted by CNN today'''
     today_url = get_today_transcript_page()
     links = get_all_links_from_page(today_url)
     return links
 
 def get_today_transcript_page():
+	''' Return the URL for the page on the CNN website listing today's transcripts'''
     import datetime
     datestring = str(datetime.date.today().year) + '.' + str(datetime.date.today().month) + '.' + str(datetime.date.today().day)
     url = "http://transcripts.cnn.com/TRANSCRIPTS/" + datestring + ".html"
     return url
 
 def get_all_links_from_page(url):
+	''' Return a list of every transcript link found on a specified page'''
     html = get_html(url)
     body_start = '''<P><a href="/TRANSCRIPTS/" class="cnnTransProv">Return to Transcripts main page</a></P>'''
     body_end = '''<!-- /Content -->'''
@@ -56,31 +61,7 @@ def get_all_links_from_page(url):
     
 
 def extract_content(page):
-    import urllib.request
-    f = urllib.request.urlopen(url)
-    html = f.read().decode("utf-8")
-    f.close()
-    return html
-
-def get_inside_string(string, start, end):
-    start_index = string.index(start) + len(start)
-    end_index = string.index(end)
-    result = string[start_index:end_index]
-    return result
-
-def get_today_transcript_links():
-    today_url = get_today_transcript_page()
-    links = get_all_links_from_page(today_url)
-    return links
-
-def get_today_transcript_page():
-    import datetime
-    datestring = str(datetime.date.today().year) + '.' + str(datetime.date.today().month) + '.' + str(datetime.date.today().day)
-    url = "http://transcripts.cnn.com/TRANSCRIPTS/" + datestring + ".html"
-    return url
-
-def get_all_links_from_page(url):
-    # Removes web formatting
+	''' Extract the trancript text from a specified page, assumed to be valid'''
     start_string = '''<P><a href="/TRANSCRIPTS/" class="cnnTransProv">Return to Transcripts main page</a></P>'''
     end_string = '''<!-- /Content -->'''
     body = get_inside_string(page, start_string, end_string)
@@ -104,6 +85,7 @@ def get_all_links_from_page(url):
     print(content)
     
 def remove_empty_items(list):
+	''' Remove any empty items from the given list of strings'''
     indices_to_remove = []
     for i in range(0, len(list)):
         if(list[i] == ''):
