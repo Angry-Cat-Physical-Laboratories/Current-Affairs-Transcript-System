@@ -7,7 +7,8 @@ def get_html(url):
     return html
 
 def get_inside_string(string, start, end):
-    ''' Return the substring beginning with start and ending with end'''
+    ''' Return the substring beginning with start and ending with end
+            Exclusive, i.e. the returned string does not include the start or end substrings'''
     start_index = string.index(start) + len(start)
     end_index = string.index(end)
     result = string[start_index:end_index]
@@ -18,16 +19,19 @@ def get_dated_transcript_links(date):
     import datetime
     datestring = str(date.year) + '.' + str(date.month) + '.' + str(date.day)
     url = "http://transcripts.cnn.com/TRANSCRIPTS/" + datestring + ".html"
-    links = get_all_links_from_page(url)
+    links = get_transcript_links(url)
     return links
 
 def get_dated_transcripts(date):
     urls = get_dated_transcript_links(date)
 
+    # Dictionary containing the transcripts for a given date
+    # [URL] = BODY
+    transcript_dictionary = {}
+
     # For each trasncript page listed for that date
     for url in urls:
-        html = get_html(url)
-        transcript_array = extract_content(html)
+        transcript_array = get_transcript(url)
 
         # Identifies the longest string
         # Since the helper function returns every transcript-like HTML section,
@@ -35,12 +39,17 @@ def get_dated_transcripts(date):
         # by locating the longest string, we can avoid complicated string operations
         longest_string = 0
         index = 0
+        
         for i in range(len(transcript_array)):
+            
             if(len(transcript_array[i][1]) > longest_string):
                 longest_string = len(transcript_array[i][1])
                 index = i
-
-    body = transcript_array[index][1]
+                
+        # The body of the transcript given by url
+        body = transcript_array[index][1]
+        transcript_dictionary[url] = body
+    return transcript_dictionary
 
 def get_transcript_links(url):
     '''Return a list of every transcript link found on a specified page'''
@@ -76,8 +85,11 @@ def get_transcript_links(url):
     return links   
     
 
-def extract_content(page):
+def get_transcript(url):
     ''' Extract the trancript text from a specified page, assumed to be valid'''
+    
+    page = get_html(url)
+    
     start_string = '''<P><a href="/TRANSCRIPTS/" class="cnnTransProv">Return to Transcripts main page</a></P>'''
     end_string = '''<!-- /Content -->'''
     body = get_inside_string(page, start_string, end_string)
@@ -98,7 +110,8 @@ def extract_content(page):
         line_content = [get_inside_string(line, '="', '">'),get_inside_string(line, ">","</")]
         content.append(line_content)
         
-    print(content)
+    #print(content)
+    return content
     
 def remove_empty_items(list):
     ''' Remove any empty items from the given list of strings'''
