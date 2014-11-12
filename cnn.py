@@ -7,7 +7,7 @@ def get_html(url):
     return html
 
 def get_inside_string(string, start, end):
-	''' Return the substring beginning with start and ending with end'''
+    ''' Return the substring beginning with start and ending with end'''
     start_index = string.index(start) + len(start)
     end_index = string.index(end)
     result = string[start_index:end_index]
@@ -26,21 +26,21 @@ def get_dated_transcripts(date):
 
     # For each trasncript page listed for that date
     for url in urls:
-	html = get_html(url)
-	transcript_array = extract_content(html)
+        html = get_html(url)
+        transcript_array = extract_content(html)
 
-	# Identifies the longest string
-	# Since the helper function returns every transcript-like HTML section,
-	# and the HTML section containing all of the words said will always be the longest string,
-	# by locating the longest string, we can avoid complicated string operations
-	longest_string = 0
-	index = 0
-	for i in range(len(transcript_array)):
-	    if(len(transcript_array[i][1]) > longest_string):
-		longest_string = len(transcript_array[i][1])
-		index = i
+        # Identifies the longest string
+        # Since the helper function returns every transcript-like HTML section,
+        # and the HTML section containing all of the words said will always be the longest string,
+        # by locating the longest string, we can avoid complicated string operations
+        longest_string = 0
+        index = 0
+        for i in range(len(transcript_array)):
+            if(len(transcript_array[i][1]) > longest_string):
+                longest_string = len(transcript_array[i][1])
+                index = i
 
-	body = transcript_array[index][1]
+    body = transcript_array[index][1]
 
 def get_transcript_links(url):
     '''Return a list of every transcript link found on a specified page'''
@@ -83,7 +83,7 @@ def extract_content(page):
     body = get_inside_string(page, start_string, end_string)
     
     # Sanitizes text
-    text_to_remove = ["\t","&nbsp; "]
+    text_to_remove = ["\t","  "]
     for char in text_to_remove:
         body = body.replace(char, "")
         
@@ -113,3 +113,5 @@ def remove_empty_items(list):
         items_removed += 1
         
     return list
+
+			
