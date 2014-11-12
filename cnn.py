@@ -1,26 +1,15 @@
-def get_html(url):
-    ''' Return the HTML content from the page at specified URL'''
-    import urllib.request
-    f = urllib.request.urlopen(url)
-    html = f.read().decode("utf-8")
-    f.close()
-    return html
+# Functions which may be of interest to a user/developer
+from linguistics import *  
 
-def get_inside_string(string, start, end):
-    ''' Return the substring beginning with start and ending with end
-            Exclusive, i.e. the returned string does not include the start or end substrings'''
-    start_index = string.index(start) + len(start)
-    end_index = string.index(end)
-    result = string[start_index:end_index]
-    return result
-
-def get_dated_transcript_links(date):
-    ''' Return a list of of all transcripts posted by CNN on a specific date'''
-    import datetime
-    datestring = str(date.year) + '.' + str(date.month) + '.' + str(date.day)
-    url = "http://transcripts.cnn.com/TRANSCRIPTS/" + datestring + ".html"
-    links = get_transcript_links(url)
-    return links
+def get_descriptors_from_transcripts(transcript_dictionary):
+      
+    mass_text = ""
+    for url in transcript_dictionary:
+        mass_text += "\n" + transcript_dictionary[url]
+    sentence_lists = get_sentence_lists(mass_text)
+    semantic_descriptors = build_semantic_descriptors(sentence_lists)
+    return semantic_descriptors
+    
 
 def get_dated_transcripts(date):
     urls = get_dated_transcript_links(date)
@@ -50,6 +39,45 @@ def get_dated_transcripts(date):
         body = transcript_array[index][1]
         transcript_dictionary[url] = body
     return transcript_dictionary
+    
+
+def get_transcript(url):
+    ''' Extract the trancript text from a specified page, assumed to be valid'''
+    
+    page = get_html(url)
+    
+    start_string = '''<P><a href="/TRANSCRIPTS/" class="cnnTransProv">Return to Transcripts main page</a></P>'''
+    end_string = '''<!-- /Content -->'''
+    body = get_inside_string(page, start_string, end_string)
+    
+    # Sanitizes text
+    text_to_remove = ["\t","  "]
+    for char in text_to_remove:
+        body = body.replace(char, "")
+        
+    lines = body.split("\n")
+    lines = remove_empty_items(lines)[:5]
+    
+    content = []
+    
+    for line in lines:
+        line = line.replace("<br>", "\n")
+        
+        line_content = [get_inside_string(line, '="', '">'),get_inside_string(line, ">","</")]
+        content.append(line_content)
+    return content
+    
+
+
+# Helper functions dealing with transcript internals
+
+def get_dated_transcript_links(date):
+    ''' Return a list of of all transcripts posted by CNN on a specific date'''
+    import datetime
+    datestring = str(date.year) + '.' + str(date.month) + '.' + str(date.day)
+    url = "http://transcripts.cnn.com/TRANSCRIPTS/" + datestring + ".html"
+    links = get_transcript_links(url)
+    return links
 
 def get_transcript_links(url):
     '''Return a list of every transcript link found on a specified page'''
@@ -83,36 +111,25 @@ def get_transcript_links(url):
         items_removed += 1
         
     return links   
-    
 
-def get_transcript(url):
-    ''' Extract the trancript text from a specified page, assumed to be valid'''
-    
-    page = get_html(url)
-    
-    start_string = '''<P><a href="/TRANSCRIPTS/" class="cnnTransProv">Return to Transcripts main page</a></P>'''
-    end_string = '''<!-- /Content -->'''
-    body = get_inside_string(page, start_string, end_string)
-    
-    # Sanitizes text
-    text_to_remove = ["\t","  "]
-    for char in text_to_remove:
-        body = body.replace(char, "")
-        
-    lines = body.split("\n")
-    lines = remove_empty_items(lines)[:5]
-    
-    content = []
-    
-    for line in lines:
-        line = line.replace("<br>", "\n")
-        
-        line_content = [get_inside_string(line, '="', '">'),get_inside_string(line, ">","</")]
-        content.append(line_content)
-        
-    #print(content)
-    return content
-    
+# Back-end / helper functions
+#  Web operations, string operations
+def get_html(url):
+    ''' Return the HTML content from the page at specified URL'''
+    import urllib.request
+    f = urllib.request.urlopen(url)
+    html = f.read().decode("utf-8")
+    f.close()
+    return html
+
+def get_inside_string(string, start, end):
+    ''' Return the substring beginning with start and ending with end
+            Exclusive, i.e. the returned string does not include the start or end substrings'''
+    start_index = string.index(start) + len(start)
+    end_index = string.index(end)
+    result = string[start_index:end_index]
+    return result
+
 def remove_empty_items(list):
     ''' Remove any empty items from the given list of strings'''
     indices_to_remove = []
@@ -126,5 +143,3 @@ def remove_empty_items(list):
         items_removed += 1
         
     return list
-
-			
