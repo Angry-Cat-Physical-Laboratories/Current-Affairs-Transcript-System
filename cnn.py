@@ -1,5 +1,5 @@
 # Functions which may be of interest to a user/developer
-from linguistics import *  
+import linguistics
 
 def get_descriptors_from_transcripts(transcript_dictionary):
       
@@ -143,3 +143,139 @@ def remove_empty_items(list):
         items_removed += 1
         
     return list
+
+# Most of this forked (i.e. shamelessly stolen) from Assignment #2
+
+def get_sentence_lists(text):
+    ''' Return a list (of sentences) of lists (words in each sentence) for a given string. Makes a few a
+        assumptions about the properties of the text -- most of which can be modified within the function itself.
+
+        Input Information:
+        2 input parameters: ( <body of text file> ) 
+        <body of text file> -- String, containing the full text of all textual documents to be analyzed.
+        
+        Output Information:
+        - Return a list of sentances, each sentance is in turn a list of all words within that sentance
+                Note that the text file is stripped of all high ASCII character
+                Sentances are delimited by ? ! .
+                Words are split by spaces or , - -- : ; ' ""        
+    '''
+
+
+    # If there is no text, e.g. if there were no valid files opened
+    if(text == ""):
+        return []
+
+    # Removes all word wrapping
+    text = text.replace('\n', ' ')
+
+    # Applies basic text formatting
+    text = text.lower()
+
+    # Replaces non-delimiter punctuation with a space
+    # e.g. so that "school's" becomes "school s"
+    #print("Removing punctuation...")
+    punctuation = [',', '-', '--', ':', ';', "'", '''"''']
+
+    for a_punctuation in punctuation:
+        text = text.replace(a_punctuation, ' ')
+  
+    # Replaces all sentence delimiters with a period
+    #print("Adding sentence delimiters...")
+    sentence_delimiters = ['?', '!']
+    
+    for delimiter in sentence_delimiters:
+        text = text.replace(delimiter, '.')
+
+    # Splits on the delimiter
+    #print("Splitting sentences...")
+    sentences = text.split('.')
+
+    # Strips any characters we do not want to have in
+    # any of our analyzed text (e.g. high ASCII)
+    #print("Removing high ASCII character...")
+    lower = 97
+    upper = 122
+    for sentence_index in range (0, len(sentences)):
+        for ascii_index in range(0, 255):
+            if (((ascii_index < lower) or (ascii_index > upper)) and (not ascii_index == 32)):
+                sentences[sentence_index] = sentences[sentence_index].replace(chr(ascii_index), ' ')
+    
+    # Splits each sentence by word
+    #print("Splitting sentences by word...")
+    sentences_as_lists = []
+    for sentence in sentences:
+        sentence_list = sentence.split()
+        sentences_as_lists.append(sentence_list)
+
+    # Removes empty lists
+    #print("Identifying empty lists...")
+    lists_to_remove = []
+    for i in range(0, len(sentences_as_lists)):
+        if(sentences_as_lists[i] == []):
+            lists_to_remove.append(i)
+    #print("Removing empty lists...")
+    #print("Must remove", len(lists_to_remove),"empty lists.")
+    
+    lists_removed = 0
+    for list_to_remove in lists_to_remove:
+        #print("Lists remaining to be removed:", (len(lists_to_remove) - lists_removed))
+        sentences_as_lists.pop(list_to_remove - lists_removed)
+        lists_removed += 1
+    # print("All sentence lists prepared!")
+
+    return sentences_as_lists
+
+def build_semantic_descriptors(sentences):
+    '''This function will build a dictionary of semantic descriptors using a list of lists of words.
+
+       Input Information:
+       1 input parameter: (<sentences>)
+       
+       <sentences> --- Array, This input must be a list that contains lists of word from English sentences.
+                       Each sub list must represent a sentence, and the elements of the sublist is a word from the sentence.
+       
+       Output Information:
+       - This function will return a single dictionary, that are the semantic descriptors.
+       - It is recommended that this function is not ran directly in console as the output insist of a very large dictionary,
+         and will take a long time to for python to print out the values.
+       '''
+    semantic_sim = {} 
+    for i in sentences:
+        word_set = set(i)
+        for x in word_set:
+            if x not in semantic_sim.keys():
+                semantic_sim[x] = {}
+            for y in word_set:
+                if x != y:
+                    if y not in semantic_sim[x]:
+                        semantic_sim[x][y] = 0
+                    semantic_sim[x][y] += 1
+    return semantic_sim
+
+ 
+#Functions Provided by M. Guerzhoy
+
+def norm(vec):
+    '''Return the norm of a vector stored as a dictionary,
+    as described in the handout for Project 2.
+    '''
+    sum_of_squares = 0.0  # floating point to handle large numbers
+    for x in vec:
+        sum_of_squares += vec[x] * vec[x]
+    return math.sqrt(sum_of_squares)
+
+
+def cosine_similarity(vec1, vec2):
+    '''Return the cosine similarity of sparse vectors vec1 and vec2,
+    stored as dictionaries as described in the handout for Project 2.
+    '''
+    if vec1 == {} or vec2 == {}:
+        return -1
+    dot_product = 0.0  # floating point to handle large numbers
+    for x in vec1:
+        if x in vec2:
+            dot_product += vec1[x] * vec2[x]
+    return dot_product / (norm(vec1) * norm(vec2))
+
+import math
