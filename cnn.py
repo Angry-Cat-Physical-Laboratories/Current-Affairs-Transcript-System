@@ -1,15 +1,38 @@
 # Functions which may be of interest to a user/developer
-import linguistics
 
 def get_descriptors_from_transcripts(transcript_dictionary):
-      
+    # Gets semantic descriptors from a transcript dictionary
     mass_text = ""
     for url in transcript_dictionary:
         mass_text += "\n" + transcript_dictionary[url]
     sentence_lists = get_sentence_lists(mass_text)
     semantic_descriptors = build_semantic_descriptors(sentence_lists)
     return semantic_descriptors
+
+def get_frequencies_from_transcripts(transcript_dictionary):
+    # Returns counts of words used on CNN
+    mass_text = ""
+    for url in transcript_dictionary:
+        mass_text += "\n" + transcript_dictionary[url]
+    sentences = get_sentence_lists(mass_text)
     
+    word_frequencies = {} 
+    for i in sentences:
+        word_set = set(i)
+        for word in word_set:
+            if word not in word_frequencies.keys():
+                word_frequencies[word] = 1
+            else:
+                word_frequencies[word] += 1
+    return word_frequencies
+    
+def get_top_n_values(dictionary, n):
+    index = 0
+    new_word_list = []
+    list_sorted = sorted(dictionary, key=dictionary.get, reverse=True)
+    for i in range(n):
+        new_word_list.append(list_sorted[i])
+    return new_word_list
 
 def get_dated_transcripts(date):
     urls = get_dated_transcript_links(date)
@@ -279,3 +302,23 @@ def cosine_similarity(vec1, vec2):
     return dot_product / (norm(vec1) * norm(vec2))
 
 import math
+
+# For testing
+if __name__ == "__main__":
+    import datetime
+    today = datetime.date.today()
+    print("downloading transcripts")
+    dictionary = get_dated_transcripts(today)
+    print("building frequency distribution")
+    freq = get_frequencies_from_transcripts(dictionary)
+    print("building descriptor dictionary")
+    desc = get_descriptors_from_transcripts(dictionary)
+    print("done\n\n")
+    word_to_consider = input("Word:")
+    while(not word_to_consider == "n"):
+        try:
+            top_thirty_words = get_top_n_values(desc[word_to_consider],30)
+            print(top_thirty_words)
+        except:
+            print("ERR: null")
+        word_to_consider = input("Word:")
