@@ -170,7 +170,7 @@ def remove_empty_items(list):
 def last_n_days(n):
     dates = []
     for i in range(n):
-    dates.append(datetime.date.fromordinal(datetime.date.today().toordinal()-n))
+        dates.append(datetime.date.fromordinal(datetime.date.today().toordinal()-n))
     return dates
 
 # Most of this forked (i.e. shamelessly stolen) from Assignment #2
