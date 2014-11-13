@@ -74,7 +74,7 @@ def get_transcript(url):
     body = get_inside_string(page, start_string, end_string)
     
     # Sanitizes text
-    text_to_remove = ["\t","  "]
+    text_to_remove = ["\t","Â  "]
     for char in text_to_remove:
         body = body.replace(char, "")
         
@@ -166,6 +166,12 @@ def remove_empty_items(list):
         items_removed += 1
         
     return list
+    
+def last_n_days(n):
+    dates = []
+    for i in range(n):
+    dates.append(datetime.date.fromordinal(datetime.date.today().toordinal()-n))
+    return dates
 
 # Most of this forked (i.e. shamelessly stolen) from Assignment #2
 
